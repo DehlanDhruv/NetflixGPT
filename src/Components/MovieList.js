@@ -8,7 +8,7 @@ const MovieList = ({ title, movies }) => {
 
    const settings = {
     dots: false,
-    infinite: true,
+    infinite: movies && movies.length > 1,
     speed: 500,
     slidesToShow: 5,
     slidesToScroll: 2,
@@ -26,8 +26,8 @@ const MovieList = ({ title, movies }) => {
     <div className="px-4 bg-transparent">
       <h1 className=" py-2 text-lg md:py-4 md:text-3xl text-white ">{title}</h1>
       {/* <div className="flex overflow-x-scroll hide-scrollbar ">  */}
-      <div className="flex md:w-100  w-[99%] h-full justify-center mx-auto"> 
-        <div className=" h-full py-4  w-[98%] ">
+      <div className="flex md:w-100  w-[97%] h-full justify-center mx-auto"> 
+        <div className=" h-full py-4  w-[97%] ">
           <Slider {...settings}>
           {movies &&
             movies.map((movie) => (

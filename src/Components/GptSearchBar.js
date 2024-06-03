@@ -10,48 +10,33 @@ const GptSearchBar = () => {
   const dispatch = useDispatch();
   // search movie in tmdb function
   const searchMovieTMBD = async (movie) =>{
-    const data = await fetch (`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(movie)}`, API_Options)
-    console.log('data' , data)
-    
+    const data = await fetch (`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(movie)}`, API_Options)    
     const json = await data.json()
-    console.log('json' , json)
-    console.log('json results' , json.results)
-
     return json.results
   }
 
   const handleGptSearchClick = async() => {
-    // const gptQuery = 'Act as a movie recommendation system and suggest some movies based on the query' + searchText.current.value + '.only  give names of 5 movies like the example ahead . Example: Harry Potter , Batman , Spiderman , James Bong '
+    const gptQuery = 'Act as a movie recommendation system and suggest some movies based on the query' + searchText.current.value + '.only  give names of 5 movies like the example ahead . Example: Harry Potter , Batman , Spiderman , James Bong '
+    const genre = searchText.current.value
+    console.log(genre)
+      const gptResults = await openai.chat.completions.create({
+        messages: [{ role: 'user', content: gptQuery  }],
+        model: 'gpt-3.5-turbo',
+      });
 
-    //   const gptResults = await openai.chat.completions.create({
-    //     messages: [{ role: 'user', content: gptQuery  }],
-    //     model: 'gpt-3.5-turbo',
-    //   });
+      //  const gptMovies= gptResults.choices?.[0]?.message?.content.split(',')   
+      //  const gptMovies = gptResults.choices?.[0]?.message?.content.split('\n').map(movie => movie.trim());
 
-    //   console.log(gptResults.choices?.[0]?.message?.content)
-      // const gptMovies= gptResults.choices?.[0]?.message?.content.split(',')   
-      // const gptMovies = gptResults.choices?.[0]?.message?.content.split('\n').map(movie => movie.trim());
+       const gptMovies = gptResults.choices?.[0]?.message?.content.split('\n').map(movie => movie.replace(/^\d+\.\s*/, '').trim());
 
-      // in this weremove the 1. Conjuring ka 1. so no confilct occurs while fetching from tmdb api
-      // const gptMovies = gptResults.choices?.[0]?.message?.content.split('\n').map(movie => movie.replace(/^\d+\.\s*/, '').trim());
-
-
-
-    const gptMovies=['The Conjuring' , "A Nightmare on Elm Street" ,"The Shining" ,"Get Out" ,"Insidious"]
-    console.log('gptmovies' , gptMovies)
       // for each movie we will search in tmdb api
       const promiseArray = gptMovies.map(  (movie) => {return ( searchMovieTMBD(movie))})
       // data will have array of [] promises as searchMovieTMDB is async
 
-      console.log( 'promise array' , promiseArray)
-
       // we will use Promise.all() which takes promise array  and prog will wait for Promise.all to finish
       const tmdbResults = await Promise.all(promiseArray)
-
-      console.log('tmdb array' , tmdbResults)
-      
       //pushing these movies in the redux store
-      dispatch(addGptMovieResult({movieNames:gptMovies , movieResults: tmdbResults , query:searchText.current.value}))
+      dispatch(addGptMovieResult({movieNames:gptMovies , movieResults: tmdbResults , query:genre}))
 
   }
 
